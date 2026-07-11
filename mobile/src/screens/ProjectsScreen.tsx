@@ -16,7 +16,7 @@ function statusColors(status: string) {
   return { bg: colors.greenTint, fg: colors.green };
 }
 
-export default function ProjectsScreen() {
+export default function ProjectsScreen({ navigation }: any) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +51,12 @@ export default function ProjectsScreen() {
         renderItem={({ item }) => {
           const sc = statusColors(item.status);
           return (
-            <TouchableOpacity style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() =>
+                navigation.navigate('ProjectDetail', { projectId: item.id, title: item.title })
+              }
+            >
               <View style={styles.cardTop}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>{item.title}</Text>

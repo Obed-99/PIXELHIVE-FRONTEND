@@ -1,6 +1,5 @@
 // The backend address - your LIVE Railway deployment.
-// Because it's public, the app works everywhere with no laptop needed:
-// Expo Go on any phone, the web preview, and the published demo build.
+// Because it's public, the app works everywhere with no laptop needed.
 export const API_URL = 'https://pixelhive-backend-production.up.railway.app';
 
 export type User = {
@@ -20,6 +19,29 @@ export type Project = {
   client?: User | null;
 };
 
+export type MediaAsset = {
+  id: number;
+  fileName: string;
+  s3KeyOriginal: string;
+  s3KeyPreview: string | null;
+  fileSize: number | null;
+  status: string; // uploaded | watermarked | released
+  viewCount: number;
+  downloadCount: number;
+};
+
+export type Contract = {
+  id: number;
+  content: string;
+  status: string; // draft | sent | signed
+  signedAt: string | null;
+};
+
+async function jsonOrThrow(res: Response, message: string) {
+  if (!res.ok) throw new Error(message);
+  return res.json();
+}
+
 export async function login(email: string, password: string): Promise<User> {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
@@ -31,7 +53,53 @@ export async function login(email: string, password: string): Promise<User> {
 }
 
 export async function getProjects(): Promise<Project[]> {
-  const res = await fetch(`${API_URL}/api/projects`);
-  if (!res.ok) throw new Error('Could not load projects');
-  return res.json();
+  return jsonOrThrow(await fetch(`${API_URL}/api/projects`), 'Could not load projects');
+}
+
+export async function getProject(id: number): Promise<Project> {
+  return jsonOrThrow(await fetch(`${API_URL}/api/projects/${id}`), 'Could not load project');
+}
+
+export async function getProjectMedia(projectId: number): Promise<MediaAsset[]> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/media?projectId=${projectId}`),
+    'Could not load media'
+  );
+}
+
+export async function getContract(projectId: number): Promise<Contract | null> {
+  const list: Contract[] = await jsonOrThrow(
+    await fetch(`${API_URL}/api/contracts?projectId=${projectId}`),
+    'Could not load contract'
+  );
+  return list.length ? list[0] : null;
+}
+
+export async function generateContract(projectId: number): Promise<Contract> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/contracts/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId }),
+    }),
+    'Could not generate contract'
+  );
+}
+
+export async function signContract(contractId: number): Promise<Contract> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/contracts/${contractId}/sign`, { method: 'POST' }),
+    'Could not sign contract'
+  );
+}
+
+export async function payForProject(projectId: number, amount: number): Promise<any> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/transactions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId, amount, paystackRef: 'DEMO-' + Date.now() }),
+    }),
+    'Payment failed'
+  );
 }
