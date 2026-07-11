@@ -121,6 +121,24 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
             {released ? 'Download ›' : 'Locked'}
           </Text>
         </TouchableOpacity>
+
+        <Text style={styles.toolsLabel}>Creator tools</Text>
+        <View style={styles.tools}>
+          <TouchableOpacity
+            style={styles.tool}
+            onPress={() => navigation.navigate('Upload', { projectId })}
+          >
+            <Text style={styles.toolText}>Upload media</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tool}
+            onPress={() =>
+              navigation.navigate('Chat', { projectId, title: project?.title ?? '' })
+            }
+          >
+            <Text style={styles.toolText}>Messages</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -169,4 +187,15 @@ const styles = StyleSheet.create({
   },
   rowLabel: { fontSize: 15, color: colors.text },
   rowValue: { fontSize: 13, color: colors.textMuted },
+  toolsLabel: { fontSize: 11, color: colors.textMuted, marginTop: 16, marginBottom: 8 },
+  tools: { flexDirection: 'row', gap: 10 },
+  tool: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  toolText: { fontSize: 13, color: colors.text },
 });

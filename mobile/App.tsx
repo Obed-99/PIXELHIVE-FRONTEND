@@ -7,6 +7,10 @@ import ProjectsScreen from './src/screens/ProjectsScreen';
 import ProjectDetailScreen from './src/screens/ProjectDetailScreen';
 import ContractScreen from './src/screens/ContractScreen';
 import PaymentScreen from './src/screens/PaymentScreen';
+import UploadScreen from './src/screens/UploadScreen';
+import ChatScreen from './src/screens/ChatScreen';
+import NotificationsScreen from './src/screens/NotificationsScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 // The list of screens and the data each one receives.
 export type RootStackParamList = {
@@ -15,6 +19,10 @@ export type RootStackParamList = {
   ProjectDetail: { projectId: number; title: string };
   Contract: { projectId: number };
   Payment: { projectId: number; amount: number; title: string };
+  Upload: { projectId: number };
+  Chat: { projectId: number; title: string };
+  Notifications: undefined;
+  Profile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +38,10 @@ export default function App() {
           <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
           <Stack.Screen name="Contract" component={ContractScreen} />
           <Stack.Screen name="Payment" component={PaymentScreen} />
+          <Stack.Screen name="Upload" component={UploadScreen} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

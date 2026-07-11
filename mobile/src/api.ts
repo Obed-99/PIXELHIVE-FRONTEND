@@ -103,3 +103,71 @@ export async function payForProject(projectId: number, amount: number): Promise<
     'Payment failed'
   );
 }
+
+export type Message = {
+  id: number;
+  content: string;
+  createdAt: string;
+  sender?: User;
+};
+
+export type NotificationItem = {
+  id: number;
+  type: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+};
+
+export async function uploadMedia(projectId: number, fileName: string): Promise<MediaAsset> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/media`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId,
+        fileName,
+        s3KeyOriginal: `originals/p${projectId}/${fileName}`,
+        s3KeyPreview: `previews/p${projectId}/${fileName}`,
+        fileSize: 268435456,
+      }),
+    }),
+    'Upload failed'
+  );
+}
+
+export async function getMessages(projectId: number): Promise<Message[]> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/messages?projectId=${projectId}`),
+    'Could not load messages'
+  );
+}
+
+export async function sendMessage(
+  projectId: number,
+  senderId: number,
+  content: string
+): Promise<Message> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId, senderId, content }),
+    }),
+    'Could not send message'
+  );
+}
+
+export async function getNotifications(userId: number): Promise<NotificationItem[]> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/notifications?userId=${userId}`),
+    'Could not load notifications'
+  );
+}
+
+export async function markNotificationRead(id: number): Promise<NotificationItem> {
+  return jsonOrThrow(
+    await fetch(`${API_URL}/api/notifications/${id}/read`, { method: 'POST' }),
+    'Could not update notification'
+  );
+}

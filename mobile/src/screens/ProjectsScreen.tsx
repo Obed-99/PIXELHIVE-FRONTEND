@@ -32,8 +32,13 @@ export default function ProjectsScreen({ navigation }: any) {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.title}>Your projects</Text>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>OO</Text>
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+            <Text style={styles.bell}>🔔</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
+            <Text style={styles.avatarText}>OO</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -87,6 +92,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   title: { fontSize: 20, fontWeight: '500', color: colors.text },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bell: { fontSize: 18 },
   avatar: {
     width: 34,
     height: 34,

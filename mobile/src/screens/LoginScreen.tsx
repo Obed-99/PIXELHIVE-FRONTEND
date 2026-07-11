@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme';
 import { login } from '../api';
+import { setCurrentUser } from '../auth';
 
 export default function LoginScreen({ navigation }: any) {
   // Pre-filled with your test user so logging in during the demo is one tap.
@@ -21,7 +22,8 @@ export default function LoginScreen({ navigation }: any) {
   async function onLogin() {
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      const user = await login(email.trim(), password);
+      setCurrentUser(user);
       navigation.replace('Projects');
     } catch (e: any) {
       Alert.alert('Login failed', e?.message ?? 'Please try again');
