@@ -11,10 +11,12 @@ import UploadScreen from './src/screens/UploadScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SignupScreen from './src/screens/SignupScreen';
 
 // The list of screens and the data each one receives.
 export type RootStackParamList = {
   Login: undefined;
+  Signup: undefined;
   Projects: undefined;
   ProjectDetail: { projectId: number; title: string };
   Contract: { projectId: number };
@@ -34,6 +36,7 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="Projects" component={ProjectsScreen} />
           <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
           <Stack.Screen name="Contract" component={ContractScreen} />

@@ -52,6 +52,21 @@ export async function login(email: string, password: string): Promise<User> {
   return res.json();
 }
 
+export async function register(
+  fullName: string,
+  email: string,
+  password: string,
+  role: string
+): Promise<User> {
+  const res = await fetch(`${API_URL}/api/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fullName, email, password, role }),
+  });
+  if (!res.ok) throw new Error('Could not create account. That email may already be in use.');
+  return res.json();
+}
+
 export async function getProjects(): Promise<Project[]> {
   return jsonOrThrow(await fetch(`${API_URL}/api/projects`), 'Could not load projects');
 }
