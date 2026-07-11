@@ -1,0 +1,16 @@
+{
+  "name": "PixelHive",
+  "short_name": "PixelHive",
+  "description": "Deliver work. Get paid. Stay protected.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#BA7517",
+  "icons": [
+    { "src": "/pixelhive-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pixelhive-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pixelhive-icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" }
+  ]
+}
