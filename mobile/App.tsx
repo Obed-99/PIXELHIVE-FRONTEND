@@ -12,6 +12,7 @@ import ChatScreen from './src/screens/ChatScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignupScreen from './src/screens/SignupScreen';
+import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
 
 // The list of screens and the data each one receives.
 export type RootStackParamList = {
@@ -25,6 +26,7 @@ export type RootStackParamList = {
   Chat: { projectId: number; title: string };
   Notifications: undefined;
   Profile: undefined;
+  AccountSettings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,6 +47,7 @@ export default function App() {
           <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

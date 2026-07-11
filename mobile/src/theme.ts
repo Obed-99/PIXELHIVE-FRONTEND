@@ -20,3 +20,15 @@ export function formatMoney(n: number | null | undefined): string {
   const v = Number(n ?? 0);
   return v.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
+
+// Initials from a full name: "Obed Opoku Junior" -> "OO"
+export function initials(name?: string | null): string {
+  if (!name) return '?';
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}

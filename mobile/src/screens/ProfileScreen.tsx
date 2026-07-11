@@ -43,10 +43,10 @@ export default function ProfileScreen({ navigation }: any) {
           <Text style={styles.rowText}>Notifications</Text>
           <Text style={styles.chev}>›</Text>
         </TouchableOpacity>
-        <View style={styles.row}>
+        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('AccountSettings')}>
           <Text style={styles.rowText}>Account settings</Text>
           <Text style={styles.chev}>›</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.footer}>

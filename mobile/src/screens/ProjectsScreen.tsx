@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, formatMoney } from '../theme';
+import { colors, formatMoney, initials } from '../theme';
 import { getProjects, Project } from '../api';
+import { getCurrentUser } from '../auth';
 
 function statusColors(status: string) {
   if (status === 'draft') return { bg: colors.grayTint, fg: colors.gray };
@@ -37,7 +38,7 @@ export default function ProjectsScreen({ navigation }: any) {
             <Text style={styles.bell}>🔔</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-            <Text style={styles.avatarText}>OO</Text>
+            <Text style={styles.avatarText}>{initials(getCurrentUser()?.fullName)}</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -7,6 +7,7 @@ export type User = {
   email: string;
   fullName: string;
   role: string;
+  createdAt?: string;
 };
 
 export type Project = {
