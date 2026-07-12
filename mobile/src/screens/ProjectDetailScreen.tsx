@@ -27,7 +27,7 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Re-fetch every time this screen comes into focus (e.g. after signing/paying).
+  // Re-fetch each time the screen focuses (e.g. after signing or paying).
   const load = useCallback(() => {
     setLoading(true);
     Promise.all([getProject(projectId), getProjectMedia(projectId), getContract(projectId)])
@@ -47,10 +47,6 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
   const firstMedia = media[0];
 
   function onPay() {
-    if (!signed) {
-      Alert.alert('Sign the contract first', 'Review and sign the contract before paying.');
-      return;
-    }
     navigation.navigate('Payment', {
       projectId,
       amount: Number(project?.price ?? 0),
@@ -59,11 +55,7 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
   }
 
   function onFiles() {
-    if (released) {
-      Alert.alert('Download started', `${firstMedia?.fileName ?? 'File'} saved to your device.`);
-    } else {
-      Alert.alert('Locked', 'Files unlock after payment.');
-    }
+    Alert.alert('Download started', `${firstMedia?.fileName ?? 'File'} saved to your device.`);
   }
 
   if (loading && !project) {
@@ -76,53 +68,56 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={styles.scroll}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>‹ Back</Text>
         </TouchableOpacity>
-
         <Text style={styles.title}>{project?.title}</Text>
-        <View style={[styles.pill, released ? styles.pillGreen : styles.pillAmber]}>
-          <Text style={[styles.pillText, { color: released ? colors.green : colors.brandDark }]}>
-            {released ? 'delivered' : signed ? 'awaiting payment' : 'awaiting contract'}
-          </Text>
+
+        {released ? (
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>✓  Payment received — files unlocked</Text>
+          </View>
+        ) : (
+          <Text style={styles.status}>🕐  {signed ? 'awaiting payment' : 'awaiting contract'}</Text>
+        )}
+
+        <View style={styles.media}>
+          <Text style={styles.mediaIcon}>🎞️</Text>
         </View>
-
-        <View style={styles.preview}>
-          <Text style={styles.previewMark}>PREVIEW · PIXELHIVE</Text>
-          <Text style={styles.previewIcon}>▶</Text>
+        <View style={styles.mediaRow}>
+          <Text style={styles.fname}>{firstMedia?.fileName ?? 'No media uploaded yet'}</Text>
+          <View style={[styles.badge, released ? styles.badgeGreen : styles.badgeGray]}>
+            <Text style={[styles.badgeText, { color: released ? colors.green : colors.textMuted }]}>
+              {released ? 'released' : 'locked'}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.fileLabel}>
-          {firstMedia
-            ? `${firstMedia.fileName} · ${released ? 'released' : 'watermarked preview'}`
-            : 'No media uploaded yet'}
-        </Text>
-
-        <TouchableOpacity
-          style={styles.row}
-          onPress={() => navigation.navigate('Contract', { projectId })}
-        >
-          <Text style={styles.rowLabel}>Contract</Text>
-          <Text style={[styles.rowValue, signed && { color: colors.green }]}>
-            {signed ? 'Signed ✓' : 'Review & sign ›'}
+        {!released && (
+          <Text style={styles.hint}>
+            You're seeing a watermarked preview. Pay to unlock the full-resolution download.
           </Text>
-        </TouchableOpacity>
+        )}
 
-        <TouchableOpacity style={styles.row} onPress={onPay}>
-          <Text style={styles.rowLabel}>Payment</Text>
-          <Text style={[styles.rowValue, released && { color: colors.green }]}>
-            {released ? 'Paid ✓' : `GHS ${formatMoney(project?.price)} due ›`}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flex: 1, minHeight: 24 }} />
 
-        <TouchableOpacity style={styles.row} onPress={onFiles}>
-          <Text style={styles.rowLabel}>Files</Text>
-          <Text style={[styles.rowValue, released && { color: colors.brand }]}>
-            {released ? 'Download ›' : 'Locked'}
-          </Text>
-        </TouchableOpacity>
+        {!signed ? (
+          <TouchableOpacity
+            style={styles.primary}
+            onPress={() => navigation.navigate('Contract', { projectId })}
+          >
+            <Text style={styles.primaryText}>Review & sign contract</Text>
+          </TouchableOpacity>
+        ) : !released ? (
+          <TouchableOpacity style={styles.primary} onPress={onPay}>
+            <Text style={styles.primaryText}>🔒  Pay GHS {formatMoney(project?.price)} to unlock</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.primary} onPress={onFiles}>
+            <Text style={styles.primaryText}>⬇  Download original</Text>
+          </TouchableOpacity>
+        )}
 
-        <Text style={styles.toolsLabel}>Creator tools</Text>
         <View style={styles.tools}>
           <TouchableOpacity
             style={styles.tool}
@@ -146,55 +141,53 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
+  scroll: { padding: 16, flexGrow: 1 },
   back: { color: colors.textMuted, fontSize: 15, marginBottom: 8 },
   title: { fontSize: 20, fontWeight: '500', color: colors.text },
-  pill: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginTop: 8,
+  status: { fontSize: 13, color: colors.textMuted, marginTop: 8, marginBottom: 14 },
+  banner: {
+    backgroundColor: colors.greenTint,
+    borderRadius: 9,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    marginTop: 10,
     marginBottom: 14,
   },
-  pillAmber: { backgroundColor: colors.brandTint },
-  pillGreen: { backgroundColor: colors.greenTint },
-  pillText: { fontSize: 12 },
-  preview: {
+  bannerText: { color: colors.green, fontSize: 13 },
+  media: {
     height: 150,
     borderRadius: 10,
-    backgroundColor: colors.surface,
+    backgroundColor: '#17171A',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
   },
-  previewMark: {
-    position: 'absolute',
-    color: colors.textMuted,
-    opacity: 0.4,
-    fontSize: 14,
-    letterSpacing: 2,
-    transform: [{ rotate: '-18deg' }],
-  },
-  previewIcon: { fontSize: 30, color: colors.textMuted },
-  fileLabel: { fontSize: 12, color: colors.textMuted, marginTop: 8, marginBottom: 6 },
-  row: {
+  mediaIcon: { fontSize: 40 },
+  mediaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    marginTop: 12,
   },
-  rowLabel: { fontSize: 15, color: colors.text },
-  rowValue: { fontSize: 13, color: colors.textMuted },
-  toolsLabel: { fontSize: 11, color: colors.textMuted, marginTop: 16, marginBottom: 8 },
-  tools: { flexDirection: 'row', gap: 10 },
+  fname: { fontSize: 14, color: colors.text },
+  badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 8 },
+  badgeGreen: { backgroundColor: colors.greenTint },
+  badgeGray: { backgroundColor: colors.grayTint },
+  badgeText: { fontSize: 11 },
+  hint: { fontSize: 13, color: colors.textMuted, marginTop: 12, lineHeight: 19 },
+  primary: {
+    backgroundColor: colors.brand,
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  primaryText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  tools: { flexDirection: 'row', gap: 10, marginTop: 12 },
   tool: {
     flex: 1,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   toolText: { fontSize: 13, color: colors.text },

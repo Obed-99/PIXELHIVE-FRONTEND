@@ -13,6 +13,7 @@ import NotificationsScreen from './src/screens/NotificationsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignupScreen from './src/screens/SignupScreen';
 import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
+import MessagesScreen from './src/screens/MessagesScreen';
 
 // The list of screens and the data each one receives.
 export type RootStackParamList = {
@@ -24,6 +25,7 @@ export type RootStackParamList = {
   Payment: { projectId: number; amount: number; title: string };
   Upload: { projectId: number };
   Chat: { projectId: number; title: string };
+  Messages: undefined;
   Notifications: undefined;
   Profile: undefined;
   AccountSettings: undefined;
@@ -45,6 +47,7 @@ export default function App() {
           <Stack.Screen name="Payment" component={PaymentScreen} />
           <Stack.Screen name="Upload" component={UploadScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="Messages" component={MessagesScreen} />
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />

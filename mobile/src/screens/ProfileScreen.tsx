@@ -1,17 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme';
+import { colors, initials } from '../theme';
 import { getCurrentUser, setCurrentUser } from '../auth';
-
-function initials(name?: string): string {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
+import TabBar from '../components/TabBar';
 
 export default function ProfileScreen({ navigation }: any) {
   const me = getCurrentUser();
@@ -54,6 +45,8 @@ export default function ProfileScreen({ navigation }: any) {
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
       </View>
+
+      <TabBar navigation={navigation} active="Profile" />
     </SafeAreaView>
   );
 }

@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, formatMoney, initials } from '../theme';
 import { getProjects, Project } from '../api';
 import { getCurrentUser } from '../auth';
+import TabBar from '../components/TabBar';
 
 function statusColors(status: string) {
   if (status === 'draft') return { bg: colors.grayTint, fg: colors.gray };
@@ -33,14 +34,9 @@ export default function ProjectsScreen({ navigation }: any) {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.title}>Your projects</Text>
-        <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-            <Text style={styles.bell}>🔔</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-            <Text style={styles.avatarText}>{initials(getCurrentUser()?.fullName)}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
+          <Text style={styles.avatarText}>{initials(getCurrentUser()?.fullName)}</Text>
+        </TouchableOpacity>
       </View>
 
       {loading && <ActivityIndicator color={colors.brand} style={{ marginTop: 40 }} />}
@@ -51,6 +47,7 @@ export default function ProjectsScreen({ navigation }: any) {
       )}
 
       <FlatList
+        style={{ flex: 1 }}
         data={projects}
         keyExtractor={(p) => String(p.id)}
         contentContainerStyle={{ padding: 16 }}
@@ -66,9 +63,7 @@ export default function ProjectsScreen({ navigation }: any) {
               <View style={styles.cardTop}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle}>{item.title}</Text>
-                  {item.client && (
-                    <Text style={styles.cardSub}>for {item.client.fullName}</Text>
-                  )}
+                  {item.client && <Text style={styles.cardSub}>for {item.client.fullName}</Text>}
                 </View>
                 <View style={[styles.badge, { backgroundColor: sc.bg }]}>
                   <Text style={[styles.badgeText, { color: sc.fg }]}>{item.status}</Text>
@@ -79,6 +74,8 @@ export default function ProjectsScreen({ navigation }: any) {
           );
         }}
       />
+
+      <TabBar navigation={navigation} active="Projects" />
     </SafeAreaView>
   );
 }
@@ -93,8 +90,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   title: { fontSize: 20, fontWeight: '500', color: colors.text },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  bell: { fontSize: 18 },
   avatar: {
     width: 34,
     height: 34,

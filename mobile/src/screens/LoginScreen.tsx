@@ -14,7 +14,7 @@ import { login } from '../api';
 import { setCurrentUser } from '../auth';
 
 export default function LoginScreen({ navigation }: any) {
-  // Pre-filled with your test user so logging in during the demo is one tap.
+  // Pre-filled with the test user so logging in during the demo is one tap.
   const [email, setEmail] = useState('obed@pixelhive.com');
   const [password, setPassword] = useState('secret123');
   const [loading, setLoading] = useState(false);
@@ -41,23 +41,29 @@ export default function LoginScreen({ navigation }: any) {
           <Text style={styles.tagline}>Deliver work. Get paid. Stay protected.</Text>
         </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="you@studio.com"
-          placeholderTextColor={colors.textMuted}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor={colors.textMuted}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.field}>
+          <Text style={styles.fieldIcon}>✉️</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="you@studio.com"
+            placeholderTextColor={colors.textMuted}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldIcon}>🔒</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor={colors.textMuted}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
 
         <TouchableOpacity style={styles.button} onPress={onLogin} disabled={loading}>
           {loading ? (
@@ -82,16 +88,17 @@ const styles = StyleSheet.create({
   logo: { fontSize: 46, color: colors.brand },
   title: { fontSize: 24, fontWeight: '500', color: colors.text, marginTop: 8 },
   tagline: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
-  input: {
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: colors.text,
+    paddingHorizontal: 12,
     marginBottom: 12,
   },
+  fieldIcon: { fontSize: 15, marginRight: 8 },
+  input: { flex: 1, paddingVertical: 12, fontSize: 15, color: colors.text },
   button: {
     backgroundColor: colors.brand,
     borderRadius: 10,
