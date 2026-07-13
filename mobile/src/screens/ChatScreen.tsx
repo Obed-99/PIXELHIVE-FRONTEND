@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -47,6 +49,11 @@ export default function ChatScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={10}
+      >
       <View style={styles.hd}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.back}>‹ Back</Text>
@@ -85,6 +92,7 @@ export default function ChatScreen({ route, navigation }: any) {
           <Text style={styles.sendText}>Send</Text>
         </TouchableOpacity>
       </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -109,12 +117,13 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
   },
   input: {
     flex: 1,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.brand,
     borderRadius: 20,
     paddingHorizontal: 14,
-    paddingVertical: 9,
-    fontSize: 14,
+    paddingVertical: 10,
+    fontSize: 15,
     color: colors.text,
   },
   send: { backgroundColor: colors.brand, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 9 },

@@ -6,28 +6,57 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Palette, formatMoney } from '../theme';
-import { payForProject } from '../api';
+import { payForProject, initializePayment, verifyPayment } from '../api';
+import { getCurrentUser } from '../auth';
 
 export default function PaymentScreen({ route, navigation }: any) {
   const colors = useTheme();
   const styles = makeStyles(colors);
   const { projectId, amount, title } = route.params;
-  const [paying, setPaying] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
+
+  function succeed() {
+    Alert.alert('Payment received', 'Your files are now unlocked.', [
+      { text: 'View files', onPress: () => navigation.goBack() },
+    ]);
+  }
 
   async function onPay() {
-    setPaying(true);
+    setBusy(true);
     try {
-      await payForProject(projectId, amount);
-      Alert.alert('Payment received', 'Your files are now unlocked.', [
-        { text: 'View files', onPress: () => navigation.goBack() },
-      ]);
+      const email = getCurrentUser()?.email ?? 'client@pixelhive.com';
+      const init = await initializePayment(projectId, email);
+      if (init.demo) {
+        // No Paystack key configured on the server - instant demo payment.
+        await payForProject(projectId, amount);
+        succeed();
+      } else {
+        // Real test-mode checkout: open Paystack's hosted payment page.
+        setReference(init.reference!);
+        await Linking.openURL(init.authorizationUrl!);
+      }
     } catch (e: any) {
       Alert.alert('Payment failed', e?.message ?? 'Please try again');
     } finally {
-      setPaying(false);
+      setBusy(false);
+    }
+  }
+
+  async function onVerify() {
+    if (!reference) return;
+    setBusy(true);
+    try {
+      await verifyPayment(projectId, reference);
+      succeed();
+    } catch (e: any) {
+      Alert.alert('Not verified', e?.message ?? 'Finish the checkout, then try again.');
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -47,16 +76,36 @@ export default function PaymentScreen({ route, navigation }: any) {
         <View style={styles.escrow}>
           <Text style={styles.escrowText}>Escrow-protected · held until delivery</Text>
         </View>
+        {reference && (
+          <Text style={styles.pendingNote}>
+            Checkout opened in your browser. Finish paying there, then come back and verify.
+          </Text>
+        )}
       </View>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.button} onPress={onPay} disabled={paying}>
-          {paying ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Pay with Paystack</Text>
-          )}
-        </TouchableOpacity>
+        {reference ? (
+          <>
+            <TouchableOpacity style={styles.button} onPress={onVerify} disabled={busy}>
+              {busy ? (
+                <ActivityIndicator color={colors.onOrange} />
+              ) : (
+                <Text style={styles.buttonText}>I've paid — verify</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onPay} disabled={busy}>
+              <Text style={styles.retry}>Reopen checkout</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={onPay} disabled={busy}>
+            {busy ? (
+              <ActivityIndicator color={colors.onOrange} />
+            ) : (
+              <Text style={styles.buttonText}>Pay with Paystack</Text>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -79,7 +128,15 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
     paddingVertical: 10,
   },
   escrowText: { color: colors.green, fontSize: 13 },
+  pendingNote: {
+    fontSize: 13,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 18,
+    lineHeight: 19,
+  },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: colors.border },
   button: { backgroundColor: colors.orange, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
   buttonText: { color: colors.onOrange, fontSize: 15, fontWeight: '500' },
+  retry: { textAlign: 'center', color: colors.brand, fontSize: 13, marginTop: 12 },
 });

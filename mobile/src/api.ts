@@ -175,6 +175,65 @@ export async function uploadMedia(
   );
 }
 
+export type PayInit = { demo: boolean; authorizationUrl?: string; reference?: string };
+
+// Starts a Paystack checkout (or reports demo mode when no key is configured).
+export async function initializePayment(projectId: number, email: string): Promise<PayInit> {
+  return jsonOrThrow(
+    await apiFetch('/api/pay/initialize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId, email }),
+    }),
+    'Could not start the payment'
+  );
+}
+
+export async function verifyPayment(projectId: number, reference: string): Promise<any> {
+  const res = await apiFetch('/api/pay/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ projectId, reference }),
+  });
+  if (res.status === 402) throw new Error('Payment not completed yet — finish the checkout first.');
+  return jsonOrThrow(res, 'Could not verify the payment');
+}
+
+export type PriceSuggestion = {
+  resolution: string | null;
+  durationMinutes: number;
+  quality: string | null;
+  currency: string;
+  suggestedPrice: number;
+};
+
+export async function suggestPrice(
+  resolution: string,
+  durationMinutes: number,
+  quality: string
+): Promise<PriceSuggestion> {
+  return jsonOrThrow(
+    await apiFetch('/api/pricing/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resolution, durationMinutes, quality }),
+    }),
+    'Could not suggest a price'
+  );
+}
+
+// Delivery analytics: fire-and-forget view tracking, counted downloads.
+export function recordView(mediaId: number): void {
+  apiFetch(`/api/media/${mediaId}/view`, { method: 'POST' }).catch(() => {});
+}
+
+export async function recordDownload(mediaId: number): Promise<MediaAsset> {
+  return jsonOrThrow(
+    await apiFetch(`/api/media/${mediaId}/download`, { method: 'POST' }),
+    'Could not record the download'
+  );
+}
+
 export async function getMessages(projectId: number): Promise<Message[]> {
   return jsonOrThrow(
     await apiFetch(`/api/messages?projectId=${projectId}`),

@@ -16,6 +16,8 @@ import {
   getProject,
   getProjectMedia,
   getContract,
+  recordView,
+  recordDownload,
   Project,
   MediaAsset,
   Contract,
@@ -36,6 +38,9 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
         setProject(p);
         setMedia(m);
         setContract(c);
+        // Delivery analytics: opening the preview counts as a view.
+        const viewed = [...m].reverse().find((x) => x.previewData) ?? m[0];
+        if (viewed) recordView(viewed.id);
       })
       .catch((e) => Alert.alert('Error', e?.message ?? 'Could not load project'))
       .finally(() => setLoading(false));
@@ -57,6 +62,7 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
   }
 
   function onFiles() {
+    if (firstMedia) recordDownload(firstMedia.id).catch(() => {});
     Alert.alert('Download started', `${firstMedia?.fileName ?? 'File'} saved to your device.`);
   }
 
@@ -108,7 +114,15 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
           )}
         </View>
         <View style={styles.mediaRow}>
-          <Text style={styles.fname}>{firstMedia?.fileName ?? 'No media uploaded yet'}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.fname}>{firstMedia?.fileName ?? 'No media uploaded yet'}</Text>
+            {firstMedia && (
+              <Text style={styles.statsLine}>
+                👁 {firstMedia.viewCount} view{firstMedia.viewCount === 1 ? '' : 's'} · ⬇{' '}
+                {firstMedia.downloadCount} download{firstMedia.downloadCount === 1 ? '' : 's'}
+              </Text>
+            )}
+          </View>
           <View style={[styles.badge, released ? styles.badgeGreen : styles.badgeGray]}>
             <Text style={[styles.badgeText, { color: released ? colors.green : colors.textMuted }]}>
               {released ? 'released' : 'locked'}
@@ -181,7 +195,7 @@ const styles = StyleSheet.create({
   media: {
     height: 150,
     borderRadius: 10,
-    backgroundColor: '#050708',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
@@ -197,11 +211,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(5,7,8,0.25)',
+    backgroundColor: 'rgba(5,7,8,0.35)',
   },
-  wmLogo: { width: 76, height: 76, opacity: 0.5 },
+  wmLogo: { width: 84, height: 84 },
   wmText: {
-    color: 'rgba(245,245,245,0.6)',
+    color: '#F5F5F5',
     fontSize: 11,
     letterSpacing: 3,
     fontWeight: '500',
@@ -214,6 +228,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   fname: { fontSize: 14, color: colors.text },
+  statsLine: { fontSize: 12, color: colors.textMuted, marginTop: 3 },
   badge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 8 },
   badgeGreen: { backgroundColor: colors.greenTint },
   badgeGray: { backgroundColor: colors.grayTint },
