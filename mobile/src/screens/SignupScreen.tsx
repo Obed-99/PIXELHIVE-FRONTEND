@@ -34,7 +34,7 @@ export default function SignupScreen({ navigation }: any) {
     try {
       const user = await register(fullName.trim(), email.trim().toLowerCase(), password, role);
       setCurrentUser(user);
-      navigation.replace('Projects');
+      navigation.replace('Home');
     } catch (e: any) {
       Alert.alert('Could not create account', e?.message ?? 'Please try again');
     } finally {

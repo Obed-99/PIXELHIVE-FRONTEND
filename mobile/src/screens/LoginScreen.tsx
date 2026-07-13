@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const user = await login(email.trim(), password);
       setCurrentUser(user);
-      navigation.replace('Projects');
+      navigation.replace('Home');
     } catch (e: any) {
       Alert.alert('Login failed', e?.message ?? 'Please try again');
     } finally {

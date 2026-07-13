@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 
 const TABS = [
+  { key: 'Home', label: 'Home', icon: '🏠' },
   { key: 'Projects', label: 'Projects', icon: '📁' },
   { key: 'Messages', label: 'Messages', icon: '💬' },
   { key: 'Profile', label: 'Profile', icon: '👤' },
