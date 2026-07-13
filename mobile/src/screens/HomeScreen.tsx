@@ -87,9 +87,12 @@ export default function HomeScreen({ navigation }: any) {
     <SafeAreaView style={styles.safe}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
         <View style={styles.header}>
-          <View>
-            <Text style={styles.hello}>{greeting()},</Text>
-            <Text style={styles.brand}>{firstName} 👋</Text>
+          <View style={styles.headerLeft}>
+            <Image source={require('../../assets/splash-icon.png')} style={styles.headerLogo} />
+            <View>
+              <Text style={styles.hello}>{greeting()},</Text>
+              <Text style={styles.brand}>{firstName} 👋</Text>
+            </View>
           </View>
           <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
             <Text style={styles.avatarText}>{initials(me?.fullName)}</Text>
@@ -204,6 +207,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
   },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerLogo: { width: 42, height: 42 },
   hello: { fontSize: 13, color: colors.textMuted },
   brand: { fontSize: 21, fontWeight: '500', color: colors.text, marginTop: 1 },
   avatar: {
