@@ -1,3 +1,5 @@
+import { getToken } from './auth';
+
 // The backend address - your LIVE Railway deployment.
 // Because it's public, the app works everywhere with no laptop needed.
 export const API_URL = 'https://pixelhive-backend-production.up.railway.app';
@@ -8,6 +10,11 @@ export type User = {
   fullName: string;
   role: string;
   createdAt?: string;
+};
+
+export type LoginResult = {
+  token: string;
+  user: User;
 };
 
 export type Project = {
@@ -26,6 +33,7 @@ export type MediaAsset = {
   s3KeyOriginal: string;
   s3KeyPreview: string | null;
   fileSize: number | null;
+  previewData?: string | null; // base64 data-URL of the uploaded picture
   status: string; // uploaded | watermarked | released
   viewCount: number;
   downloadCount: number;
@@ -38,12 +46,36 @@ export type Contract = {
   signedAt: string | null;
 };
 
+export type Message = {
+  id: number;
+  content: string;
+  createdAt: string;
+  sender?: User;
+};
+
+export type NotificationItem = {
+  id: number;
+  type: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+};
+
+// Every authenticated request carries the JWT from login.
+function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
+  const token = getToken();
+  const headers: Record<string, string> = { ...(options.headers as any) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return fetch(`${API_URL}${path}`, { ...options, headers });
+}
+
 async function jsonOrThrow(res: Response, message: string) {
+  if (res.status === 401) throw new Error('Session expired - please log in again');
   if (!res.ok) throw new Error(message);
   return res.json();
 }
 
-export async function login(email: string, password: string): Promise<User> {
+export async function login(email: string, password: string): Promise<LoginResult> {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -69,23 +101,23 @@ export async function register(
 }
 
 export async function getProjects(): Promise<Project[]> {
-  return jsonOrThrow(await fetch(`${API_URL}/api/projects`), 'Could not load projects');
+  return jsonOrThrow(await apiFetch('/api/projects'), 'Could not load projects');
 }
 
 export async function getProject(id: number): Promise<Project> {
-  return jsonOrThrow(await fetch(`${API_URL}/api/projects/${id}`), 'Could not load project');
+  return jsonOrThrow(await apiFetch(`/api/projects/${id}`), 'Could not load project');
 }
 
 export async function getProjectMedia(projectId: number): Promise<MediaAsset[]> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/media?projectId=${projectId}`),
+    await apiFetch(`/api/media?projectId=${projectId}`),
     'Could not load media'
   );
 }
 
 export async function getContract(projectId: number): Promise<Contract | null> {
   const list: Contract[] = await jsonOrThrow(
-    await fetch(`${API_URL}/api/contracts?projectId=${projectId}`),
+    await apiFetch(`/api/contracts?projectId=${projectId}`),
     'Could not load contract'
   );
   return list.length ? list[0] : null;
@@ -93,7 +125,7 @@ export async function getContract(projectId: number): Promise<Contract | null> {
 
 export async function generateContract(projectId: number): Promise<Contract> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/contracts/generate`, {
+    await apiFetch('/api/contracts/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ projectId }),
@@ -104,14 +136,14 @@ export async function generateContract(projectId: number): Promise<Contract> {
 
 export async function signContract(contractId: number): Promise<Contract> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/contracts/${contractId}/sign`, { method: 'POST' }),
+    await apiFetch(`/api/contracts/${contractId}/sign`, { method: 'POST' }),
     'Could not sign contract'
   );
 }
 
 export async function payForProject(projectId: number, amount: number): Promise<any> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/transactions`, {
+    await apiFetch('/api/transactions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ projectId, amount, paystackRef: 'DEMO-' + Date.now() }),
@@ -120,24 +152,14 @@ export async function payForProject(projectId: number, amount: number): Promise<
   );
 }
 
-export type Message = {
-  id: number;
-  content: string;
-  createdAt: string;
-  sender?: User;
-};
-
-export type NotificationItem = {
-  id: number;
-  type: string;
-  message: string;
-  read: boolean;
-  createdAt: string;
-};
-
-export async function uploadMedia(projectId: number, fileName: string): Promise<MediaAsset> {
+export async function uploadMedia(
+  projectId: number,
+  fileName: string,
+  fileSize: number,
+  previewData?: string
+): Promise<MediaAsset> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/media`, {
+    await apiFetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -145,7 +167,8 @@ export async function uploadMedia(projectId: number, fileName: string): Promise<
         fileName,
         s3KeyOriginal: `originals/p${projectId}/${fileName}`,
         s3KeyPreview: `previews/p${projectId}/${fileName}`,
-        fileSize: 268435456,
+        fileSize,
+        previewData,
       }),
     }),
     'Upload failed'
@@ -154,7 +177,7 @@ export async function uploadMedia(projectId: number, fileName: string): Promise<
 
 export async function getMessages(projectId: number): Promise<Message[]> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/messages?projectId=${projectId}`),
+    await apiFetch(`/api/messages?projectId=${projectId}`),
     'Could not load messages'
   );
 }
@@ -165,7 +188,7 @@ export async function sendMessage(
   content: string
 ): Promise<Message> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/messages`, {
+    await apiFetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ projectId, senderId, content }),
@@ -176,14 +199,14 @@ export async function sendMessage(
 
 export async function getNotifications(userId: number): Promise<NotificationItem[]> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/notifications?userId=${userId}`),
+    await apiFetch(`/api/notifications?userId=${userId}`),
     'Could not load notifications'
   );
 }
 
 export async function markNotificationRead(id: number): Promise<NotificationItem> {
   return jsonOrThrow(
-    await fetch(`${API_URL}/api/notifications/${id}/read`, { method: 'POST' }),
+    await apiFetch(`/api/notifications/${id}/read`, { method: 'POST' }),
     'Could not update notification'
   );
 }

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -44,7 +45,8 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
 
   const signed = contract?.status === 'signed';
   const released = media.some((m) => m.status === 'released');
-  const firstMedia = media[0];
+  // Prefer the newest upload that has a real picture attached.
+  const firstMedia = [...media].reverse().find((m) => m.previewData) ?? media[0];
 
   function onPay() {
     navigation.navigate('Payment', {
@@ -83,7 +85,22 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
         )}
 
         <View style={styles.media}>
-          <Text style={styles.mediaIcon}>🎞️</Text>
+          {firstMedia?.previewData ? (
+            <>
+              <Image
+                source={{ uri: firstMedia.previewData }}
+                style={styles.mediaImg}
+                resizeMode="cover"
+              />
+              {!released && (
+                <View style={styles.wmOverlay}>
+                  <Text style={styles.wmText}>PREVIEW · PIXELHIVE</Text>
+                </View>
+              )}
+            </>
+          ) : (
+            <Text style={styles.mediaIcon}>🎞️</Text>
+          )}
         </View>
         <View style={styles.mediaRow}>
           <Text style={styles.fname}>{firstMedia?.fileName ?? 'No media uploaded yet'}</Text>
@@ -166,6 +183,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   mediaIcon: { fontSize: 40 },
+  mediaImg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  wmOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(5,7,8,0.25)',
+  },
+  wmText: {
+    color: 'rgba(245,245,245,0.75)',
+    fontSize: 14,
+    letterSpacing: 3,
+    fontWeight: '500',
+    transform: [{ rotate: '-16deg' }],
+  },
   mediaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

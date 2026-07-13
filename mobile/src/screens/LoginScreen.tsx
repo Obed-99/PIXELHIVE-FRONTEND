@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Palette } from '../theme';
 import { login } from '../api';
-import { setCurrentUser } from '../auth';
+import { setSession } from '../auth';
 
 export default function LoginScreen({ navigation }: any) {
   const colors = useTheme();
@@ -25,8 +25,8 @@ export default function LoginScreen({ navigation }: any) {
   async function onLogin() {
     setLoading(true);
     try {
-      const user = await login(email.trim(), password);
-      setCurrentUser(user);
+      const { user, token } = await login(email.trim(), password);
+      setSession(user, token);
       navigation.replace('Home');
     } catch (e: any) {
       Alert.alert('Login failed', e?.message ?? 'Please try again');

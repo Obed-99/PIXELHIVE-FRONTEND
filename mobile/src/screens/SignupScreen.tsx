@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Palette } from '../theme';
-import { register } from '../api';
-import { setCurrentUser } from '../auth';
+import { register, login } from '../api';
+import { setSession } from '../auth';
 
 export default function SignupScreen({ navigation }: any) {
   const colors = useTheme();
@@ -34,8 +34,10 @@ export default function SignupScreen({ navigation }: any) {
     }
     setLoading(true);
     try {
-      const user = await register(fullName.trim(), email.trim().toLowerCase(), password, role);
-      setCurrentUser(user);
+      await register(fullName.trim(), email.trim().toLowerCase(), password, role);
+      // Log straight in so the new account gets its token.
+      const { user, token } = await login(email.trim().toLowerCase(), password);
+      setSession(user, token);
       navigation.replace('Home');
     } catch (e: any) {
       Alert.alert('Could not create account', e?.message ?? 'Please try again');

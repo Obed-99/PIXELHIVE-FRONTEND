@@ -7,25 +7,64 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { useTheme, Palette } from '../theme';
 import { uploadMedia } from '../api';
+
+type Picked = {
+  uri: string;
+  dataUrl?: string;
+  fileName: string;
+  fileSize: number;
+};
 
 export default function UploadScreen({ route, navigation }: any) {
   const colors = useTheme();
   const styles = makeStyles(colors);
   const { projectId } = route.params;
-  const [fileName, setFileName] = useState('highlights_4k.mp4');
+  const [picked, setPicked] = useState<Picked | null>(null);
+  const [fileName, setFileName] = useState('');
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
+  async function onPick() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Allow photo access to upload pictures.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.4, // compress so the upload stays small
+      base64: true,
+    });
+    if (result.canceled || !result.assets?.length) return;
+
+    const a = result.assets[0];
+    const name = a.fileName ?? `photo_${Date.now()}.jpg`;
+    // Build a data-URL the backend can store and any device can display.
+    const dataUrl = a.base64
+      ? `data:image/jpeg;base64,${a.base64}`
+      : a.uri.startsWith('data:')
+        ? a.uri
+        : undefined;
+    setPicked({ uri: a.uri, dataUrl, fileName: name, fileSize: a.fileSize ?? 0 });
+    setFileName(name);
+    setStatus(null);
+  }
+
   async function onUpload() {
-    if (!fileName.trim()) return;
+    if (!picked) {
+      Alert.alert('Pick a picture first', 'Tap the box above to choose one from your device.');
+      return;
+    }
     setUploading(true);
     setStatus('Uploading… generating watermark…');
     try {
-      await uploadMedia(projectId, fileName.trim());
+      await uploadMedia(projectId, fileName.trim() || picked.fileName, picked.fileSize, picked.dataUrl);
       setStatus('Uploaded — watermarked preview ready.');
       setTimeout(() => navigation.goBack(), 900);
     } catch (e: any) {
@@ -46,26 +85,38 @@ export default function UploadScreen({ route, navigation }: any) {
       </View>
 
       <View style={styles.body}>
-        <View style={styles.drop}>
-          <Text style={styles.dropIcon}>⬆</Text>
-          <Text style={styles.dropText}>Select a video or photo</Text>
-        </View>
+        <TouchableOpacity style={styles.drop} onPress={onPick}>
+          {picked ? (
+            <Image source={{ uri: picked.uri }} style={styles.preview} resizeMode="cover" />
+          ) : (
+            <>
+              <Text style={styles.dropIcon}>⬆</Text>
+              <Text style={styles.dropText}>Tap to choose a picture from your device</Text>
+            </>
+          )}
+        </TouchableOpacity>
+        {picked && (
+          <TouchableOpacity onPress={onPick}>
+            <Text style={styles.changeLink}>Choose a different picture</Text>
+          </TouchableOpacity>
+        )}
 
         <Text style={styles.label}>File name</Text>
         <TextInput
           style={styles.input}
           value={fileName}
           onChangeText={setFileName}
+          placeholder="Pick a picture to fill this in"
+          placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
         />
-        <Text style={styles.tags}>Tags (saved offline first): ceremony · 4K · outdoor</Text>
         {status && <Text style={styles.status}>{status}</Text>}
       </View>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.button} onPress={onUpload} disabled={uploading}>
           {uploading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.onBrand} />
           ) : (
             <Text style={styles.buttonText}>Upload</Text>
           )}
@@ -86,13 +137,17 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
     borderColor: colors.border,
     borderStyle: 'dashed',
     borderRadius: 12,
-    paddingVertical: 28,
+    minHeight: 180,
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: 10,
   },
+  preview: { width: '100%', height: 180 },
   dropIcon: { fontSize: 30, color: colors.textMuted },
-  dropText: { fontSize: 13, color: colors.textMuted, marginTop: 6 },
-  label: { fontSize: 12, color: colors.textMuted, marginBottom: 6 },
+  dropText: { fontSize: 13, color: colors.textMuted, marginTop: 6, paddingHorizontal: 20, textAlign: 'center' },
+  changeLink: { color: colors.brand, fontSize: 13, textAlign: 'center', marginBottom: 12 },
+  label: { fontSize: 12, color: colors.textMuted, marginBottom: 6, marginTop: 6 },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -103,8 +158,7 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
     color: colors.text,
     marginBottom: 12,
   },
-  tags: { fontSize: 12, color: colors.textMuted },
-  status: { fontSize: 13, color: colors.green, marginTop: 16 },
+  status: { fontSize: 13, color: colors.green, marginTop: 10 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: colors.border },
   button: { backgroundColor: colors.brand, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
   buttonText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
