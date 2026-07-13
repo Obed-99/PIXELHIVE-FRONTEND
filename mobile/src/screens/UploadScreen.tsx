@@ -105,5 +105,5 @@ const styles = StyleSheet.create({
   status: { fontSize: 13, color: colors.green, marginTop: 16 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: colors.border },
   button: { backgroundColor: colors.brand, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  buttonText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
 });

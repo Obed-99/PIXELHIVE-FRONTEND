@@ -1,18 +1,21 @@
-// PixelHive brand + UI colors (the "honey hive" palette from the mockup).
+// PixelHive brand + UI colors (dark teal/orange rebrand).
 export const colors = {
-  brand: '#BA7517',      // honey amber - primary actions
-  brandDark: '#854F0B',
-  brandTint: '#FAEEDA',
-  bg: '#FFFFFF',
-  surface: '#F7F5EF',    // light card / preview background
-  text: '#1A1A17',
-  textMuted: '#6B6A63',
-  border: '#E5E2D9',
-  green: '#27500A',
-  greenTint: '#EAF3DE',
-  gray: '#444441',
-  grayTint: '#F1EFE8',
-  red: '#A32D2D',
+  brand: '#0EA5A4',      // teal - primary actions
+  brandDark: '#2DD4CF',  // light teal - text on brandTint
+  brandTint: '#0D2E2D',  // dark teal tint - chips, avatars
+  onBrand: '#04211F',    // text on teal buttons
+  orange: '#F97316',     // payment / unlock moments
+  onOrange: '#2B1000',   // text on orange buttons
+  bg: '#0B0F14',
+  surface: '#162028',    // card / preview background
+  text: '#F5F5F5',
+  textMuted: '#8A96A3',
+  border: '#24303B',
+  green: '#2DD4CF',
+  greenTint: '#0D2E2D',
+  gray: '#B7C2CC',
+  grayTint: '#1E2A34',
+  red: '#F87171',
 };
 
 // Simple money formatter: 1500 -> "1,500"

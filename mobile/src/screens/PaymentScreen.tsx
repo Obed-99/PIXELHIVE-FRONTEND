@@ -78,6 +78,6 @@ const styles = StyleSheet.create({
   },
   escrowText: { color: colors.green, fontSize: 13 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: colors.border },
-  button: { backgroundColor: colors.brand, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  button: { backgroundColor: colors.orange, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
+  buttonText: { color: colors.onOrange, fontSize: 15, fontWeight: '500' },
 });

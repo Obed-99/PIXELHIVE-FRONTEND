@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme';
@@ -36,7 +37,7 @@ export default function LoginScreen({ navigation }: any) {
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <View style={styles.brand}>
-          <Text style={styles.logo}>⬢</Text>
+          <Image source={require('../../assets/splash-icon.png')} style={styles.logo} />
           <Text style={styles.title}>PixelHive</Text>
           <Text style={styles.tagline}>Deliver work. Get paid. Stay protected.</Text>
         </View>
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
   brand: { alignItems: 'center', marginBottom: 28 },
-  logo: { fontSize: 46, color: colors.brand },
+  logo: { width: 90, height: 90 },
   title: { fontSize: 24, fontWeight: '500', color: colors.text, marginTop: 8 },
   tagline: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
   field: {
@@ -106,6 +107,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  buttonText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
   link: { textAlign: 'center', color: colors.brand, fontSize: 13, marginTop: 16 },
 });

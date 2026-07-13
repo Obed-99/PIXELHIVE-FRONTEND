@@ -109,8 +109,10 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
             <Text style={styles.primaryText}>Review & sign contract</Text>
           </TouchableOpacity>
         ) : !released ? (
-          <TouchableOpacity style={styles.primary} onPress={onPay}>
-            <Text style={styles.primaryText}>🔒  Pay GHS {formatMoney(project?.price)} to unlock</Text>
+          <TouchableOpacity style={[styles.primary, styles.primaryOrange]} onPress={onPay}>
+            <Text style={[styles.primaryText, styles.primaryOrangeText]}>
+              🔒  Pay GHS {formatMoney(project?.price)} to unlock
+            </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.primary} onPress={onFiles}>
@@ -157,7 +159,9 @@ const styles = StyleSheet.create({
   media: {
     height: 150,
     borderRadius: 10,
-    backgroundColor: '#17171A',
+    backgroundColor: '#050708',
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -180,7 +184,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
   },
-  primaryText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  primaryText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
+  primaryOrange: { backgroundColor: colors.orange },
+  primaryOrangeText: { color: colors.onOrange },
   tools: { flexDirection: 'row', gap: 10, marginTop: 12 },
   tool: {
     flex: 1,

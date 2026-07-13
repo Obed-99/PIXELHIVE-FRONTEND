@@ -63,7 +63,7 @@ export default function ChatScreen({ route, navigation }: any) {
             const mine = !!me && item.sender?.id === me.id;
             return (
               <View style={[styles.bubble, mine ? styles.mine : styles.theirs]}>
-                <Text style={[styles.bubbleText, mine && { color: '#fff' }]}>{item.content}</Text>
+                <Text style={[styles.bubbleText, mine && { color: colors.onBrand }]}>{item.content}</Text>
               </View>
             );
           }}
@@ -116,5 +116,5 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   send: { backgroundColor: colors.brand, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 9 },
-  sendText: { color: '#fff', fontSize: 14, fontWeight: '500' },
+  sendText: { color: colors.onBrand, fontSize: 14, fontWeight: '500' },
 });
