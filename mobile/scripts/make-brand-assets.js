@@ -11,7 +11,6 @@ const MARK = `
     <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#0EA5A4"/><stop offset="1" stop-color="#053A39"/>
     </linearGradient>
-    <clipPath id="abd"><polygon points="180,191 198.2,201.5 198.2,222.5 180,233 161.8,222.5 161.8,201.5"/></clipPath>
   </defs>
   <polygon points="327,180 307.3,253.5 253.5,307.3 180,327 106.5,307.3 52.7,253.5 33,180 52.7,106.5 106.5,52.7 180,33 253.5,52.7 307.3,106.5" fill="none" stroke="url(#tg)" stroke-width="13"/>
   <g id="blades">
@@ -25,12 +24,6 @@ const MARK = `
   <g transform="translate(0,-16)">
     <polygon points="152,159 170.2,169.5 170.2,190.5 152,201 133.8,190.5 133.8,169.5" fill="none" stroke="#0B6462" stroke-width="6"/>
     <polygon points="208,159 226.2,169.5 226.2,190.5 208,201 189.8,190.5 189.8,169.5" fill="none" stroke="#0B6462" stroke-width="6"/>
-    <g clip-path="url(#abd)">
-      <rect x="160" y="195" width="40" height="6" fill="#F97316"/>
-      <rect x="160" y="205" width="40" height="6" fill="#F97316"/>
-      <rect x="160" y="215" width="40" height="6" fill="#F97316"/>
-      <rect x="160" y="225" width="40" height="6" fill="#F97316"/>
-    </g>
     <polygon points="180,191 198.2,201.5 198.2,222.5 180,233 161.8,222.5 161.8,201.5" fill="none" stroke="#0B6462" stroke-width="6"/>
   </g>
 `;
