@@ -1,7 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme, useThemeMode, toggleThemeMode, Palette, initials } from '../theme';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  useTheme,
+  useThemeMode,
+  toggleThemeMode,
+  Palette,
+  initials,
+  formatMoney,
+} from '../theme';
 import { getCurrentUser, setCurrentUser } from '../auth';
+import { getProjects } from '../api';
 import TabBar from '../components/TabBar';
 
 export default function ProfileScreen({ navigation }: any) {
@@ -9,49 +19,105 @@ export default function ProfileScreen({ navigation }: any) {
   const styles = makeStyles(colors);
   const mode = useThemeMode();
   const me = getCurrentUser();
+  const [projectCount, setProjectCount] = useState<number | null>(null);
+  const [totalValue, setTotalValue] = useState(0);
+
+  const load = useCallback(() => {
+    getProjects()
+      .then((ps) => {
+        setProjectCount(ps.length);
+        setTotalValue(ps.reduce((s, p) => s + Number(p.price ?? 0), 0));
+      })
+      .catch(() => setProjectCount(null));
+  }, []);
+
+  useFocusEffect(load);
+
+  const memberYear = me?.createdAt ? new Date(me.createdAt).getFullYear() : '—';
 
   function onLogout() {
     setCurrentUser(null);
     navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   }
 
+  function MenuRow({
+    icon,
+    label,
+    value,
+    onPress,
+  }: {
+    icon: string;
+    label: string;
+    value?: string;
+    onPress: () => void;
+  }) {
+    return (
+      <TouchableOpacity style={styles.menuRow} onPress={onPress}>
+        <View style={styles.menuIcon}>
+          <Text style={{ fontSize: 15 }}>{icon}</Text>
+        </View>
+        <Text style={styles.menuLabel}>{label}</Text>
+        <Text style={styles.menuValue}>{value ?? '›'}</Text>
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.hd}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>‹ Back</Text>
-        </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
         <Text style={styles.title}>Profile</Text>
-      </View>
 
-      <View style={styles.card}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials(me?.fullName)}</Text>
+        <View style={styles.card}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials(me?.fullName)}</Text>
+          </View>
+          <Text style={styles.name}>{me?.fullName ?? 'Guest'}</Text>
+          <Text style={styles.email}>{me?.email ?? ''}</Text>
+          {me?.role ? (
+            <View style={styles.roleBadge}>
+              <Text style={styles.roleText}>{me.role}</Text>
+            </View>
+          ) : null}
         </View>
-        <Text style={styles.name}>{me?.fullName ?? 'Guest'}</Text>
-        <Text style={styles.sub}>{me ? `${me.role} · ${me.email}` : ''}</Text>
-      </View>
 
-      <View style={styles.rows}>
-        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Notifications')}>
-          <Text style={styles.rowText}>Notifications</Text>
-          <Text style={styles.chev}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('AccountSettings')}>
-          <Text style={styles.rowText}>Account settings</Text>
-          <Text style={styles.chev}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row} onPress={toggleThemeMode}>
-          <Text style={styles.rowText}>Appearance</Text>
-          <Text style={styles.rowValue}>{mode === 'dark' ? '🌙 Dark' : '☀️ Light'}</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.stats}>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{projectCount ?? '—'}</Text>
+            <Text style={styles.statLabel}>Projects</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>GHS {formatMoney(totalValue)}</Text>
+            <Text style={styles.statLabel}>Portfolio</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{memberYear}</Text>
+            <Text style={styles.statLabel}>Member since</Text>
+          </View>
+        </View>
 
-      <View style={styles.footer}>
+        <View style={styles.menu}>
+          <MenuRow
+            icon="🔔"
+            label="Notifications"
+            onPress={() => navigation.navigate('Notifications')}
+          />
+          <MenuRow
+            icon="⚙️"
+            label="Account settings"
+            onPress={() => navigation.navigate('AccountSettings')}
+          />
+          <MenuRow
+            icon={mode === 'dark' ? '🌙' : '☀️'}
+            label="Appearance"
+            value={mode === 'dark' ? 'Dark' : 'Light'}
+            onPress={toggleThemeMode}
+          />
+        </View>
+
         <TouchableOpacity style={styles.logout} onPress={onLogout}>
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
 
       <TabBar navigation={navigation} active="Profile" />
     </SafeAreaView>
@@ -60,40 +126,81 @@ export default function ProfileScreen({ navigation }: any) {
 
 const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  hd: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, paddingBottom: 8 },
-  back: { color: colors.textMuted, fontSize: 15 },
-  title: { fontSize: 17, fontWeight: '500', color: colors.text },
-  card: { alignItems: 'center', paddingVertical: 24 },
+  title: {
+    fontSize: 20,
+    fontWeight: '500',
+    color: colors.text,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  card: { alignItems: 'center', paddingVertical: 22 },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     backgroundColor: colors.brandTint,
+    borderWidth: 2,
+    borderColor: colors.brand,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
   },
-  avatarText: { color: colors.brandDark, fontSize: 20, fontWeight: '500' },
-  name: { fontSize: 18, fontWeight: '500', color: colors.text },
-  sub: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
-  rows: { paddingHorizontal: 16 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+  avatarText: { color: colors.brandDark, fontSize: 24, fontWeight: '500' },
+  name: { fontSize: 19, fontWeight: '500', color: colors.text },
+  email: { fontSize: 13, color: colors.textMuted, marginTop: 3 },
+  roleBadge: {
+    marginTop: 8,
+    backgroundColor: colors.brandTint,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  rowText: { fontSize: 15, color: colors.text },
-  rowValue: { fontSize: 14, color: colors.textMuted },
-  chev: { color: colors.textMuted, fontSize: 16 },
-  footer: { flex: 1, justifyContent: 'flex-end', padding: 16 },
-  logout: {
+  roleText: { color: colors.brandDark, fontSize: 12, fontWeight: '500', textTransform: 'capitalize' },
+  stats: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 18 },
+  stat: {
+    flex: 1,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
+    borderRadius: 14,
     paddingVertical: 14,
+    alignItems: 'center',
+  },
+  statValue: { fontSize: 15, fontWeight: '500', color: colors.text },
+  statLabel: { fontSize: 11, color: colors.textMuted, marginTop: 3 },
+  menu: {
+    marginHorizontal: 16,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    marginBottom: 18,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  menuIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.brandTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuLabel: { flex: 1, fontSize: 14, color: colors.text },
+  menuValue: { fontSize: 13, color: colors.textMuted },
+  logout: {
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: colors.red,
+    borderRadius: 12,
+    paddingVertical: 13,
     alignItems: 'center',
   },
   logoutText: { color: colors.red, fontSize: 15, fontWeight: '500' },

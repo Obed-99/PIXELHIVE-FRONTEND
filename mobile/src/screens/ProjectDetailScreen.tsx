@@ -94,7 +94,12 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
               />
               {!released && (
                 <View style={styles.wmOverlay}>
-                  <Text style={styles.wmText}>PREVIEW · PIXELHIVE</Text>
+                  <Image
+                    source={require('../../assets/splash-icon.png')}
+                    style={styles.wmLogo}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.wmText}>PIXELHIVE PREVIEW</Text>
                 </View>
               )}
             </>
@@ -194,12 +199,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(5,7,8,0.25)',
   },
+  wmLogo: { width: 76, height: 76, opacity: 0.5 },
   wmText: {
-    color: 'rgba(245,245,245,0.75)',
-    fontSize: 14,
+    color: 'rgba(245,245,245,0.6)',
+    fontSize: 11,
     letterSpacing: 3,
     fontWeight: '500',
-    transform: [{ rotate: '-16deg' }],
+    marginTop: 4,
   },
   mediaRow: {
     flexDirection: 'row',
