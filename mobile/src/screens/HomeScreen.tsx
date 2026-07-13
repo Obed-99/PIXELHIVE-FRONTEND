@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTheme, useThemeMode, toggleThemeMode, Palette, formatMoney, initials } from '../theme';
 import { getProjects, Project } from '../api';
 import { getCurrentUser } from '../auth';
+import { coverFor } from '../covers';
 import TabBar from '../components/TabBar';
 
 const SLIDES = [
@@ -25,16 +26,6 @@ const SLIDES = [
   { img: require('../../assets/showcase/slide5.jpg'), caption: 'Get paid, every time' },
 ];
 
-// Each project gets its own cover photo, matched by name.
-const COVERS = [
-  { match: 'wedding', img: require('../../assets/covers/wedding.jpg') },
-  { match: 'graduation', img: require('../../assets/covers/graduation.jpg') },
-  { match: 'brand', img: require('../../assets/covers/brand.jpg') },
-  { match: 'corporate', img: require('../../assets/covers/corporate.jpg') },
-];
-const coverFor = (p: Project) =>
-  COVERS.find((c) => p.title.toLowerCase().includes(c.match))?.img ??
-  SLIDES[p.id % SLIDES.length].img;
 
 function greeting(): string {
   const h = new Date().getHours();
