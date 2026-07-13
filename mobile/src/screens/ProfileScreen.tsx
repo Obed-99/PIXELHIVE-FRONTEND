@@ -1,10 +1,13 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, initials } from '../theme';
+import { useTheme, useThemeMode, toggleThemeMode, Palette, initials } from '../theme';
 import { getCurrentUser, setCurrentUser } from '../auth';
 import TabBar from '../components/TabBar';
 
 export default function ProfileScreen({ navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
+  const mode = useThemeMode();
   const me = getCurrentUser();
 
   function onLogout() {
@@ -38,6 +41,10 @@ export default function ProfileScreen({ navigation }: any) {
           <Text style={styles.rowText}>Account settings</Text>
           <Text style={styles.chev}>›</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.row} onPress={toggleThemeMode}>
+          <Text style={styles.rowText}>Appearance</Text>
+          <Text style={styles.rowValue}>{mode === 'dark' ? '🌙 Dark' : '☀️ Light'}</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.footer}>
@@ -51,7 +58,7 @@ export default function ProfileScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   hd: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, paddingBottom: 8 },
   back: { color: colors.textMuted, fontSize: 15 },
@@ -79,6 +86,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   rowText: { fontSize: 15, color: colors.text },
+  rowValue: { fontSize: 14, color: colors.textMuted },
   chev: { color: colors.textMuted, fontSize: 16 },
   footer: { flex: 1, justifyContent: 'flex-end', padding: 16 },
   logout: {

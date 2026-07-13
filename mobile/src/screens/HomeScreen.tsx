@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, formatMoney, initials } from '../theme';
+import { useTheme, useThemeMode, toggleThemeMode, Palette, formatMoney, initials } from '../theme';
 import { getProjects, Project } from '../api';
 import { getCurrentUser } from '../auth';
 import TabBar from '../components/TabBar';
@@ -25,9 +25,16 @@ const SLIDES = [
   { img: require('../../assets/showcase/slide5.jpg'), caption: 'Get paid, every time' },
 ];
 
-// Project cards borrow a showcase photo as their cover, keyed by id.
-const COVERS = SLIDES.map((s) => s.img);
-const coverFor = (id: number) => COVERS[id % COVERS.length];
+// Each project gets its own cover photo, matched by name.
+const COVERS = [
+  { match: 'wedding', img: require('../../assets/covers/wedding.jpg') },
+  { match: 'graduation', img: require('../../assets/covers/graduation.jpg') },
+  { match: 'brand', img: require('../../assets/covers/brand.jpg') },
+  { match: 'corporate', img: require('../../assets/covers/corporate.jpg') },
+];
+const coverFor = (p: Project) =>
+  COVERS.find((c) => p.title.toLowerCase().includes(c.match))?.img ??
+  SLIDES[p.id % SLIDES.length].img;
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -37,6 +44,9 @@ function greeting(): string {
 }
 
 export default function HomeScreen({ navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
+  const mode = useThemeMode();
   const { width } = useWindowDimensions();
   const slideW = width - 32;
   const [projects, setProjects] = useState<Project[]>([]);
@@ -94,9 +104,14 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.brand}>{firstName} 👋</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-            <Text style={styles.avatarText}>{initials(me?.fullName)}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.modeBtn} onPress={toggleThemeMode}>
+              <Text style={styles.modeIcon}>{mode === 'dark' ? '☀️' : '🌙'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
+              <Text style={styles.avatarText}>{initials(me?.fullName)}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.search}>
@@ -156,7 +171,7 @@ export default function HomeScreen({ navigation }: any) {
             {recent.length === 0 && <Text style={styles.empty}>No projects match your search.</Text>}
             {recent.slice(0, 4).map((p) => (
               <TouchableOpacity key={p.id} style={styles.card} onPress={() => openProject(p)}>
-                <Image source={coverFor(p.id)} style={styles.thumb} resizeMode="cover" />
+                <Image source={coverFor(p)} style={styles.thumb} resizeMode="cover" />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cardTitle} numberOfLines={1}>{p.title}</Text>
                   <Text style={styles.cardSub}>
@@ -178,7 +193,7 @@ export default function HomeScreen({ navigation }: any) {
             >
               {trending.map((p) => (
                 <TouchableOpacity key={p.id} style={styles.trendCard} onPress={() => openProject(p)}>
-                  <Image source={coverFor(p.id)} style={styles.trendCover} resizeMode="cover" />
+                  <Image source={coverFor(p)} style={styles.trendCover} resizeMode="cover" />
                   <View style={styles.trendBody}>
                     <Text style={styles.cardTitle} numberOfLines={1}>{p.title}</Text>
                     <View style={styles.trendMeta}>
@@ -198,7 +213,7 @@ export default function HomeScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row',
@@ -208,6 +223,18 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  modeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modeIcon: { fontSize: 15 },
   headerLogo: { width: 42, height: 42 },
   hello: { fontSize: 13, color: colors.textMuted },
   brand: { fontSize: 21, fontWeight: '500', color: colors.text, marginTop: 1 },

@@ -9,10 +9,12 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme';
+import { useTheme, Palette } from '../theme';
 import { getContract, generateContract, signContract, Contract } from '../api';
 
 export default function ContractScreen({ route, navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const { projectId } = route.params;
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,7 +76,7 @@ export default function ContractScreen({ route, navigation }: any) {
             ) : (
               <TouchableOpacity style={styles.button} onPress={onSign} disabled={signing}>
                 {signing ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.onBrand} />
                 ) : (
                   <Text style={styles.buttonText}>Sign contract</Text>
                 )}
@@ -87,7 +89,7 @@ export default function ContractScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   hd: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, paddingBottom: 8 },
   back: { color: colors.textMuted, fontSize: 15 },
@@ -96,6 +98,6 @@ const styles = StyleSheet.create({
   content: { fontSize: 14, color: colors.text, lineHeight: 22 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: colors.border },
   button: { backgroundColor: colors.brand, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  buttonText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
   signedNote: { textAlign: 'center', color: colors.green, fontSize: 15, fontWeight: '500' },
 });

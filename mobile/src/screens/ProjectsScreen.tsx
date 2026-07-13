@@ -8,17 +8,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, formatMoney, initials } from '../theme';
+import { useTheme, Palette, formatMoney, initials } from '../theme';
 import { getProjects, Project } from '../api';
 import { getCurrentUser } from '../auth';
 import TabBar from '../components/TabBar';
 
-function statusColors(status: string) {
+function statusColors(colors: Palette, status: string) {
   if (status === 'draft') return { bg: colors.grayTint, fg: colors.gray };
   return { bg: colors.greenTint, fg: colors.green };
 }
 
 export default function ProjectsScreen({ navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export default function ProjectsScreen({ navigation }: any) {
         keyExtractor={(p) => String(p.id)}
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => {
-          const sc = statusColors(item.status);
+          const sc = statusColors(colors, item.status);
           return (
             <TouchableOpacity
               style={styles.card}
@@ -80,7 +82,7 @@ export default function ProjectsScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row',

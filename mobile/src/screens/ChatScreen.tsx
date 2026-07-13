@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors } from '../theme';
+import { useTheme, Palette } from '../theme';
 import { getMessages, sendMessage, Message } from '../api';
 import { getCurrentUser } from '../auth';
 
 export default function ChatScreen({ route, navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const { projectId, title } = route.params;
   const me = getCurrentUser();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -87,7 +89,7 @@ export default function ChatScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   hd: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, paddingBottom: 8 },
   back: { color: colors.textMuted, fontSize: 15 },

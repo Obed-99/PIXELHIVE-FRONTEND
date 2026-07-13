@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '../theme';
+import { useTheme, Palette } from '../theme';
 
 const TABS = [
   { key: 'Home', label: 'Home', icon: '🏠' },
@@ -9,6 +9,8 @@ const TABS = [
 ];
 
 export default function TabBar({ navigation, active }: { navigation: any; active: string }) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   return (
     <View style={styles.bar}>
       {TABS.map((t) => {
@@ -30,7 +32,7 @@ export default function TabBar({ navigation, active }: { navigation: any; active
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   bar: {
     flexDirection: 'row',
     borderTopWidth: 1,

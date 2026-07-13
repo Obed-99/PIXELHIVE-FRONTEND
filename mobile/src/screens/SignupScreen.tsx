@@ -10,11 +10,13 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme';
+import { useTheme, Palette } from '../theme';
 import { register } from '../api';
 import { setCurrentUser } from '../auth';
 
 export default function SignupScreen({ navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -112,7 +114,7 @@ export default function SignupScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
   brand: { alignItems: 'center', marginBottom: 24 },

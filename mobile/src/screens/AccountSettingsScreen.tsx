@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme';
+import { useTheme, Palette } from '../theme';
 import { getCurrentUser } from '../auth';
 
 function formatDate(iso?: string): string {
@@ -15,17 +15,19 @@ function cap(s?: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
-  return (
-    <View style={[styles.row, last && { borderBottomWidth: 0 }]}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
-    </View>
-  );
-}
-
 export default function AccountSettingsScreen({ navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const me = getCurrentUser();
+
+  function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
+    return (
+      <View style={[styles.row, last && { borderBottomWidth: 0 }]}>
+        <Text style={styles.rowLabel}>{label}</Text>
+        <Text style={styles.rowValue}>{value}</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -50,7 +52,7 @@ export default function AccountSettingsScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   hd: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, paddingBottom: 8 },
   back: { color: colors.textMuted, fontSize: 15 },

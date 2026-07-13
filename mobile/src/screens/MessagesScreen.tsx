@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors } from '../theme';
+import { useTheme, Palette } from '../theme';
 import { getProjects, Project } from '../api';
 import TabBar from '../components/TabBar';
 
 export default function MessagesScreen({ navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +68,7 @@ export default function MessagesScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   title: { fontSize: 20, fontWeight: '500', color: colors.text, paddingHorizontal: 16, paddingTop: 8, marginBottom: 6 },
   row: {

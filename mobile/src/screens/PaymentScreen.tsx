@@ -8,10 +8,12 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, formatMoney } from '../theme';
+import { useTheme, Palette, formatMoney } from '../theme';
 import { payForProject } from '../api';
 
 export default function PaymentScreen({ route, navigation }: any) {
+  const colors = useTheme();
+  const styles = makeStyles(colors);
   const { projectId, amount, title } = route.params;
   const [paying, setPaying] = useState(false);
 
@@ -60,7 +62,7 @@ export default function PaymentScreen({ route, navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   hd: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, paddingBottom: 8 },
   back: { color: colors.textMuted, fontSize: 15 },

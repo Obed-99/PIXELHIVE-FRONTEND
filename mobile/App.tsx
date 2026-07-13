@@ -15,6 +15,13 @@ import SignupScreen from './src/screens/SignupScreen';
 import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
 import MessagesScreen from './src/screens/MessagesScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import { useThemeMode } from './src/theme';
+
+// Status bar text flips with the app theme.
+function ThemedStatusBar() {
+  const mode = useThemeMode();
+  return <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />;
+}
 
 // The list of screens and the data each one receives.
 export type RootStackParamList = {
@@ -38,7 +45,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
+      <ThemedStatusBar />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />
