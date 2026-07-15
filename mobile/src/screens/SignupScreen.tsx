@@ -8,6 +8,9 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Palette } from '../theme';
@@ -48,7 +51,15 @@ export default function SignupScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.brand}>
           <Image source={require('../../assets/splash-icon.png')} style={styles.logo} />
           <Text style={styles.title}>Create your account</Text>
@@ -78,6 +89,8 @@ export default function SignupScreen({ navigation }: any) {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          returnKeyType="go"
+          onSubmitEditing={onCreate}
         />
 
         <Text style={styles.label}>I am a…</Text>
@@ -111,14 +124,15 @@ export default function SignupScreen({ navigation }: any) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.link}>Already have an account? Log in</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const makeStyles = (colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
+  container: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 24 },
   brand: { alignItems: 'center', marginBottom: 24 },
   logo: { width: 72, height: 72 },
   title: { fontSize: 22, fontWeight: '500', color: colors.text, marginTop: 8 },
