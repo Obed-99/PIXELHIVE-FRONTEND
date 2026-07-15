@@ -23,6 +23,7 @@ export default function LoginScreen({ navigation }: any) {
   // Pre-filled with the test user so logging in during the demo is one tap.
   const [email, setEmail] = useState('obed@pixelhive.com');
   const [password, setPassword] = useState('secret123');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onLogin() {
@@ -75,10 +76,16 @@ export default function LoginScreen({ navigation }: any) {
             placeholderTextColor={colors.textMuted}
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!showPassword}
             returnKeyType="go"
             onSubmitEditing={onLogin}
           />
+          <TouchableOpacity
+            onPress={() => setShowPassword((s) => !s)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.eye}>{showPassword ? '🙈' : '👁️'}</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.button} onPress={onLogin} disabled={loading}>
@@ -115,6 +122,7 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
     marginBottom: 12,
   },
   fieldIcon: { fontSize: 15, marginRight: 8 },
+  eye: { fontSize: 16, paddingLeft: 8 },
   input: { flex: 1, paddingVertical: 12, fontSize: 15, color: colors.text },
   button: {
     backgroundColor: colors.brand,

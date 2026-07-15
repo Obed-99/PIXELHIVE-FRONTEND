@@ -23,6 +23,7 @@ export default function SignupScreen({ navigation }: any) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('creator');
   const [loading, setLoading] = useState(false);
 
@@ -82,16 +83,24 @@ export default function SignupScreen({ navigation }: any) {
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Password (min 6 characters)"
-          placeholderTextColor={colors.textMuted}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          returnKeyType="go"
-          onSubmitEditing={onCreate}
-        />
+        <View style={styles.passRow}>
+          <TextInput
+            style={styles.passInput}
+            placeholder="Password (min 6 characters)"
+            placeholderTextColor={colors.textMuted}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            returnKeyType="go"
+            onSubmitEditing={onCreate}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword((s) => !s)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.eye}>{showPassword ? '🙈' : '👁️'}</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.label}>I am a…</Text>
         <View style={styles.roleRow}>
@@ -147,6 +156,17 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
     color: colors.text,
     marginBottom: 12,
   },
+  passRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    paddingRight: 12,
+    marginBottom: 12,
+  },
+  passInput: { flex: 1, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.text },
+  eye: { fontSize: 16 },
   label: { fontSize: 12, color: colors.textMuted, marginBottom: 8, marginTop: 2 },
   roleRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   role: {
