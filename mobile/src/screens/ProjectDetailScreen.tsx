@@ -22,6 +22,7 @@ import {
   MediaAsset,
   Contract,
 } from '../api';
+import { getCurrentUser } from '../auth';
 
 export default function ProjectDetailScreen({ route, navigation }: any) {
   const { projectId } = route.params;
@@ -50,6 +51,8 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
 
   const signed = contract?.status === 'signed';
   const released = media.some((m) => m.status === 'released');
+  // Creators manage and wait to get paid; clients review, sign and pay.
+  const isCreator = getCurrentUser()?.role === 'creator';
   // Prefer the newest upload that has a real picture attached.
   const firstMedia = [...media].reverse().find((m) => m.previewData) ?? media[0];
 
@@ -137,7 +140,17 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
 
         <View style={{ flex: 1, minHeight: 24 }} />
 
-        {!signed ? (
+        {isCreator ? (
+          <View style={styles.waitCard}>
+            <Text style={styles.waitText}>
+              {released
+                ? '✓  Paid — files delivered to the client'
+                : signed
+                  ? '⏳  Contract signed — waiting for the client to pay'
+                  : '⏳  Waiting for the client to review and sign the contract'}
+            </Text>
+          </View>
+        ) : !signed ? (
           <TouchableOpacity
             style={styles.primary}
             onPress={() => navigation.navigate('Contract', { projectId })}
@@ -157,12 +170,14 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
         )}
 
         <View style={styles.tools}>
-          <TouchableOpacity
-            style={styles.tool}
-            onPress={() => navigation.navigate('Upload', { projectId })}
-          >
-            <Text style={styles.toolText}>Upload media</Text>
-          </TouchableOpacity>
+          {isCreator && (
+            <TouchableOpacity
+              style={styles.tool}
+              onPress={() => navigation.navigate('Upload', { projectId })}
+            >
+              <Text style={styles.toolText}>Upload media</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.tool}
             onPress={() =>
@@ -243,6 +258,14 @@ const styles = StyleSheet.create({
   primaryText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
   primaryOrange: { backgroundColor: colors.orange },
   primaryOrangeText: { color: colors.onOrange },
+  waitCard: {
+    backgroundColor: colors.brandTint,
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+  },
+  waitText: { color: colors.brandDark, fontSize: 14, fontWeight: '500', textAlign: 'center' },
   tools: { flexDirection: 'row', gap: 10, marginTop: 12 },
   tool: {
     flex: 1,
