@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme, useThemeMode, toggleThemeMode, Palette, formatMoney, initials } from '../theme';
-import { getMyProjects, Project } from '../api';
+import { getMyProjects, getContract, getProjectMedia, Project } from '../api';
 import { getCurrentUser } from '../auth';
 import { coverFor } from '../covers';
 import TabBar from '../components/TabBar';
@@ -41,6 +41,7 @@ export default function HomeScreen({ navigation }: any) {
   const { width } = useWindowDimensions();
   const slideW = width - 32;
   const [projects, setProjects] = useState<Project[]>([]);
+  const [attention, setAttention] = useState<{ project: Project; kind: 'sign' | 'pay' | 'done' }[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [slide, setSlide] = useState(0);
@@ -50,7 +51,25 @@ export default function HomeScreen({ navigation }: any) {
 
   const load = useCallback(() => {
     getMyProjects()
-      .then(setProjects)
+      .then(async (ps) => {
+        setProjects(ps);
+        // Clients get an action strip: what each project needs from them.
+        if (me?.role === 'client') {
+          const items = await Promise.all(
+            ps.map(async (project) => {
+              const [c, m] = await Promise.all([
+                getContract(project.id).catch(() => null),
+                getProjectMedia(project.id).catch(() => []),
+              ]);
+              const signed = c?.status === 'signed';
+              const released = m.some((x) => x.status === 'released');
+              const kind: 'sign' | 'pay' | 'done' = released ? 'done' : signed ? 'pay' : 'sign';
+              return { project, kind };
+            })
+          );
+          setAttention(items);
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -153,6 +172,42 @@ export default function HomeScreen({ navigation }: any) {
           <ActivityIndicator color={colors.brand} style={{ marginTop: 30 }} />
         ) : (
           <>
+            {me?.role === 'client' && attention.length > 0 && (
+              <>
+                <View style={styles.sectionRow}>
+                  <Text style={styles.section}>Needs your attention</Text>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+                >
+                  {attention.map((a) => {
+                    const looks = {
+                      sign: { icon: '✍️', text: 'Contract ready — review & sign', bg: colors.brandTint, fg: colors.brandDark },
+                      pay: { icon: '💳', text: 'Signed — ready to pay', bg: 'rgba(249,115,22,0.15)', fg: colors.orange },
+                      done: { icon: '🎉', text: 'Delivered — download your files', bg: colors.greenTint, fg: colors.green },
+                    }[a.kind];
+                    return (
+                      <TouchableOpacity
+                        key={a.project.id}
+                        style={[styles.attnCard, { backgroundColor: looks.bg }]}
+                        onPress={() => openProject(a.project)}
+                      >
+                        <Text style={styles.attnIcon}>{looks.icon}</Text>
+                        <Text style={[styles.attnTitle, { color: looks.fg }]} numberOfLines={1}>
+                          {a.project.title}
+                        </Text>
+                        <Text style={[styles.attnText, { color: looks.fg }]} numberOfLines={2}>
+                          {looks.text} ›
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </>
+            )}
+
             <View style={styles.sectionRow}>
               <Text style={styles.section}>Recent projects</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Projects')}>
@@ -269,6 +324,10 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.border },
   dotOn: { backgroundColor: colors.brand, width: 18 },
+  attnCard: { width: 200, borderRadius: 14, padding: 14 },
+  attnIcon: { fontSize: 20, marginBottom: 8 },
+  attnTitle: { fontSize: 13, fontWeight: '500' },
+  attnText: { fontSize: 12, marginTop: 3, opacity: 0.9 },
   sectionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -140,6 +140,34 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
 
         <View style={{ flex: 1, minHeight: 24 }} />
 
+        {!isCreator && (
+          <View style={styles.steps}>
+            {(['Sign', 'Pay', 'Download'] as const).map((label, i) => {
+              const n = i + 1;
+              const current = released ? 3 : signed ? 2 : 1;
+              const done = n < current || (released && n === 3);
+              const active = n === current && !done;
+              return (
+                <View key={label} style={styles.stepWrap}>
+                  {i > 0 && (
+                    <View style={[styles.stepLine, n <= current && styles.stepLineOn]} />
+                  )}
+                  <View
+                    style={[styles.stepDot, done && styles.stepDone, active && styles.stepActive]}
+                  >
+                    <Text style={[styles.stepNum, (done || active) && styles.stepNumOn]}>
+                      {done ? '✓' : n}
+                    </Text>
+                  </View>
+                  <Text style={[styles.stepLabel, (done || active) && styles.stepLabelOn]}>
+                    {label}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         {isCreator ? (
           <View style={styles.waitCard}>
             <Text style={styles.waitText}>
@@ -258,6 +286,39 @@ const styles = StyleSheet.create({
   primaryText: { color: colors.onBrand, fontSize: 15, fontWeight: '500' },
   primaryOrange: { backgroundColor: colors.orange },
   primaryOrangeText: { color: colors.onOrange },
+  steps: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  stepWrap: { flex: 1, alignItems: 'center' },
+  stepLine: {
+    position: 'absolute',
+    top: 15,
+    right: '50%',
+    left: '-50%',
+    height: 2,
+    backgroundColor: colors.border,
+  },
+  stepLineOn: { backgroundColor: colors.brand },
+  stepDot: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepDone: { backgroundColor: colors.brand, borderColor: colors.brand },
+  stepActive: { borderColor: colors.orange, backgroundColor: colors.surface },
+  stepNum: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+  stepNumOn: { color: colors.text },
+  stepLabel: { fontSize: 11, color: colors.textMuted, marginTop: 6 },
+  stepLabelOn: { color: colors.text, fontWeight: '500' },
   waitCard: {
     backgroundColor: colors.brandTint,
     borderRadius: 10,
