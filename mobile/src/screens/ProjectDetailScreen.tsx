@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -18,6 +19,7 @@ import {
   getContract,
   recordView,
   recordDownload,
+  updateProject,
   Project,
   MediaAsset,
   Contract,
@@ -30,6 +32,9 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
   const [media, setMedia] = useState<MediaAsset[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [priceInput, setPriceInput] = useState('');
+  const [savingPrice, setSavingPrice] = useState(false);
 
   // Re-fetch each time the screen focuses (e.g. after signing or paying).
   const load = useCallback(() => {
@@ -62,6 +67,24 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
       amount: Number(project?.price ?? 0),
       title: project?.title ?? '',
     });
+  }
+
+  async function onSavePrice() {
+    const p = Number(priceInput);
+    if (!p || p <= 0) {
+      Alert.alert('Invalid price', 'Enter a number greater than zero.');
+      return;
+    }
+    setSavingPrice(true);
+    try {
+      const updated = await updateProject(projectId, { price: p });
+      setProject(updated);
+      setEditingPrice(false);
+    } catch (e: any) {
+      Alert.alert('Could not update the price', e?.message ?? 'Please try again');
+    } finally {
+      setSavingPrice(false);
+    }
   }
 
   function onFiles() {
@@ -165,6 +188,50 @@ export default function ProjectDetailScreen({ route, navigation }: any) {
                 </View>
               );
             })}
+          </View>
+        )}
+
+        {isCreator && (
+          <View style={styles.priceCard}>
+            {editingPrice ? (
+              <>
+                <Text style={styles.priceLabel}>New price (GHS)</Text>
+                <View style={styles.priceEditRow}>
+                  <TextInput
+                    style={styles.priceInput}
+                    value={priceInput}
+                    onChangeText={setPriceInput}
+                    keyboardType="numeric"
+                    autoFocus
+                  />
+                  <TouchableOpacity style={styles.priceSave} onPress={onSavePrice} disabled={savingPrice}>
+                    <Text style={styles.priceSaveText}>{savingPrice ? '…' : 'Save'}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setEditingPrice(false)}>
+                    <Text style={styles.priceCancel}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <View style={styles.priceEditRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.priceLabel}>Your price</Text>
+                  <Text style={styles.priceValue}>GHS {formatMoney(project?.price)}</Text>
+                </View>
+                {released ? (
+                  <Text style={styles.priceLocked}>Paid · locked</Text>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setPriceInput(String(project?.price ?? ''));
+                      setEditingPrice(true);
+                    }}
+                  >
+                    <Text style={styles.priceEdit}>✏️ Edit</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
           </View>
         )}
 
@@ -319,6 +386,39 @@ const styles = StyleSheet.create({
   stepNumOn: { color: colors.text },
   stepLabel: { fontSize: 11, color: colors.textMuted, marginTop: 6 },
   stepLabelOn: { color: colors.text, fontWeight: '500' },
+  priceCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  priceLabel: { fontSize: 12, color: colors.textMuted },
+  priceValue: { fontSize: 20, fontWeight: '500', color: colors.text, marginTop: 2 },
+  priceEditRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  priceInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.brand,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 16,
+    color: colors.text,
+    marginTop: 6,
+  },
+  priceSave: {
+    backgroundColor: colors.brand,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    marginTop: 6,
+  },
+  priceSaveText: { color: colors.onBrand, fontSize: 14, fontWeight: '500' },
+  priceCancel: { color: colors.textMuted, fontSize: 13, marginTop: 6 },
+  priceEdit: { color: colors.brand, fontSize: 14, fontWeight: '500' },
+  priceLocked: { color: colors.textMuted, fontSize: 13 },
   waitCard: {
     backgroundColor: colors.brandTint,
     borderRadius: 10,
