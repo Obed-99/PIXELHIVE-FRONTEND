@@ -1,4 +1,4 @@
-import { User } from './api';
+import type { User } from './api';
 
 // In-memory session: the logged-in user plus their JWT.
 let currentUser: User | null = null;

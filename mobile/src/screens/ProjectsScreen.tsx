@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme, Palette, formatMoney, initials } from '../theme';
-import { getProjects, Project } from '../api';
+import { getMyProjects, Project } from '../api';
 import { getCurrentUser } from '../auth';
 import { coverFor } from '../covers';
 import TabBar from '../components/TabBar';
@@ -31,7 +31,7 @@ export default function ProjectsScreen({ navigation }: any) {
   const [filter, setFilter] = useState('all');
 
   const load = useCallback(() => {
-    getProjects()
+    getMyProjects()
       .then(setProjects)
       .catch((e) => setError(e?.message ?? 'Something went wrong'))
       .finally(() => setLoading(false));

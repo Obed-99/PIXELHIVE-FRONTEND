@@ -11,7 +11,7 @@ import {
   formatMoney,
 } from '../theme';
 import { getCurrentUser, setCurrentUser } from '../auth';
-import { getProjects } from '../api';
+import { getMyProjects } from '../api';
 import TabBar from '../components/TabBar';
 
 export default function ProfileScreen({ navigation }: any) {
@@ -23,7 +23,7 @@ export default function ProfileScreen({ navigation }: any) {
   const [totalValue, setTotalValue] = useState(0);
 
   const load = useCallback(() => {
-    getProjects()
+    getMyProjects()
       .then((ps) => {
         setProjectCount(ps.length);
         setTotalValue(ps.reduce((s, p) => s + Number(p.price ?? 0), 0));

@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme, useThemeMode, toggleThemeMode, Palette, formatMoney, initials } from '../theme';
-import { getProjects, Project } from '../api';
+import { getMyProjects, Project } from '../api';
 import { getCurrentUser } from '../auth';
 import { coverFor } from '../covers';
 import TabBar from '../components/TabBar';
@@ -49,7 +49,7 @@ export default function HomeScreen({ navigation }: any) {
   const firstName = (me?.fullName ?? '').split(' ')[0] || 'there';
 
   const load = useCallback(() => {
-    getProjects()
+    getMyProjects()
       .then(setProjects)
       .catch(() => {})
       .finally(() => setLoading(false));

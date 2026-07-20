@@ -1,4 +1,4 @@
-import { getToken } from './auth';
+import { getToken, getCurrentUser } from './auth';
 
 // The backend address - your LIVE Railway deployment.
 // Because it's public, the app works everywhere with no laptop needed.
@@ -123,6 +123,14 @@ export async function createProject(
 
 export async function getProjects(): Promise<Project[]> {
   return jsonOrThrow(await apiFetch('/api/projects'), 'Could not load projects');
+}
+
+// Only the logged-in user's projects: created by them (creator) or for them (client).
+export async function getMyProjects(): Promise<Project[]> {
+  const me = getCurrentUser();
+  if (!me) return getProjects();
+  const filter = me.role === 'creator' ? `creatorId=${me.id}` : `clientId=${me.id}`;
+  return jsonOrThrow(await apiFetch(`/api/projects?${filter}`), 'Could not load projects');
 }
 
 export async function getProject(id: number): Promise<Project> {

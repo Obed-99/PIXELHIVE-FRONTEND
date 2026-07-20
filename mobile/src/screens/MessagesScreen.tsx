@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme, Palette } from '../theme';
-import { getProjects, getMessages, Project, Message } from '../api';
+import { getMyProjects, getMessages, Project, Message } from '../api';
 import { coverFor } from '../covers';
 import TabBar from '../components/TabBar';
 
@@ -36,7 +36,7 @@ export default function MessagesScreen({ navigation }: any) {
   const load = useCallback(() => {
     (async () => {
       try {
-        const projects = await getProjects();
+        const projects = await getMyProjects();
         const withLast = await Promise.all(
           projects.map(async (project) => {
             const ms = await getMessages(project.id).catch(() => [] as Message[]);
