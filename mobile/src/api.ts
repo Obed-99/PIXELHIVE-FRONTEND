@@ -100,6 +100,27 @@ export async function register(
   return res.json();
 }
 
+export async function getUsers(): Promise<User[]> {
+  return jsonOrThrow(await apiFetch('/api/users'), 'Could not load users');
+}
+
+export async function createProject(
+  creatorId: number,
+  clientId: number,
+  title: string,
+  description: string,
+  price: number
+): Promise<Project> {
+  return jsonOrThrow(
+    await apiFetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ creatorId, clientId, title, description, price }),
+    }),
+    'Could not create the project'
+  );
+}
+
 export async function getProjects(): Promise<Project[]> {
   return jsonOrThrow(await apiFetch('/api/projects'), 'Could not load projects');
 }

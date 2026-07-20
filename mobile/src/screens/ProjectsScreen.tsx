@@ -52,9 +52,16 @@ export default function ProjectsScreen({ navigation }: any) {
             {projects.length} projects · GHS {formatMoney(totalValue)} total
           </Text>
         </View>
-        <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
-          <Text style={styles.avatarText}>{initials(getCurrentUser()?.fullName)}</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          {getCurrentUser()?.role === 'creator' && (
+            <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('NewProject')}>
+              <Text style={styles.newBtnText}>＋ New</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
+            <Text style={styles.avatarText}>{initials(getCurrentUser()?.fullName)}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View>
@@ -141,6 +148,14 @@ const makeStyles = (colors: Palette) => StyleSheet.create({
   },
   title: { fontSize: 20, fontWeight: '500', color: colors.text },
   subtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  newBtn: {
+    backgroundColor: colors.brand,
+    borderRadius: 16,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+  },
+  newBtnText: { color: colors.onBrand, fontSize: 13, fontWeight: '500' },
   avatar: {
     width: 36,
     height: 36,

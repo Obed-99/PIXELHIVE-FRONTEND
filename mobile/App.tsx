@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import SplashScreen from './src/screens/SplashScreen';
+import NewProjectScreen from './src/screens/NewProjectScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import ProjectsScreen from './src/screens/ProjectsScreen';
 import ProjectDetailScreen from './src/screens/ProjectDetailScreen';
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   Signup: undefined;
   Home: undefined;
   Projects: undefined;
+  NewProject: undefined;
   ProjectDetail: { projectId: number; title: string };
   Contract: { projectId: number };
   Payment: { projectId: number; amount: number; title: string };
@@ -56,6 +58,7 @@ export default function App() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Projects" component={ProjectsScreen} />
           <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+          <Stack.Screen name="NewProject" component={NewProjectScreen} />
           <Stack.Screen name="Contract" component={ContractScreen} />
           <Stack.Screen name="Payment" component={PaymentScreen} />
           <Stack.Screen name="Upload" component={UploadScreen} />
